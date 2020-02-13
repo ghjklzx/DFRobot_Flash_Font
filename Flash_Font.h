@@ -1,15 +1,14 @@
-#ifndef __DFRobot_M0Font_H
-#define __DFRobot_M0Font_H
+#ifndef __Flash_Font_H
+#define __Flash_Font_H
 
-#if ARDUINO >= 100
+
 #include "Arduino.h"
-#else
-#include "WProgram.h"
-#endif
 #include <SPI.h>
 #include <UD.h>
+#include <W25QSPIFlash.h>
+
 #define HEAD_ADDRESS 0xc00000//SPIflash首地址
-#define MAXBUFSIZE 1024//
+// #define MAXBUFSIZE 1024//开在ino里
 
 #define CS 32//SPIflash片选引脚
 #define CS_H  digitalWrite(CS, HIGH)
@@ -20,19 +19,19 @@
 #define CHAR_WIGTH_AND_BYTE_PER_LINE   4//
 #endif
 
-class DFRobot_M0Font
+class Flash_Font
 {
 public:
     typedef struct 
     {
-    char title[4];//juix
-    uint16_t height;//16
-    uint16_t width;//16
-    uint16_t baseline;//12
-    uint16_t xHeight;
-    uint16_t yHeight;
-    uint16_t firstChar;//0
-    uint16_t lastChar; //65535
+        char title[4];//juix
+        uint16_t height;//16
+        uint16_t width;//16
+        uint16_t baseline;//12
+        uint16_t xHeight;
+        uint16_t yHeight;
+        uint16_t firstChar;//0
+        uint16_t lastChar; //65535
     } __attribute__ ((packed)) uniInfo_t;//所有字符的信息
 
     typedef struct {
@@ -44,46 +43,33 @@ public:
     uint16_t width;
     uint16_t bytePerLine;
     } __attribute__ ((packed)) charSpec_t;//字符信息
-	
-	uniInfo_t uniInfo;
-    //uint16_t pos_x = 0;
-    //uint16_t pos_y = 0;
-
-    uint8_t buf[MAXBUFSIZE];//
+    uniInfo_t uniInfo;
     uint32_t transSize = 0;
     uint32_t fileSize;
-    File resourceFile;
+    File File_f;
 
 public:
-    DFRobot_M0Font();
+    Flash_Font();
 
 	void begin(void);
 
     uint16_t u8x8_utf8_next (uint8_t b);
 
     void printString(const String &string) ;
+
+    uint8_t getBuf(uint16_t uni);
     
-	void drawStringMap(uint16_t uni);
+	void drawStringMap(uint8_t charBuf);
 
     void eraseSpace (void);
-    
-    void transport (void);
 
-    void EraseSector (uint32_t address);
+    void burnFontLib(uint32_t fontAddress,uint32_t MAXBUFSIZE);
+    
+    void SDInit(void);
+    
 
 private:
     uint16_t utf8State = 0;
     uint16_t encoding = 0 ;
-	uint32_t address = HEAD_ADDRESS;
-    int count = 0;
-    
-
-private:
-
-	uint8_t W25Q16_BUSY(void);
-    void Write_Enable(void);
-    void W25Q16_Read (uint32_t address,void* data, uint16_t j);
-    void W25Q16_Write(uint32_t address,const uint8_t *data,uint16_t left);
-    
-    
+	uint32_t address = HEAD_ADDRESS; 
 };
