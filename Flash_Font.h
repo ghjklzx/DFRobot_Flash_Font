@@ -65,7 +65,7 @@ public:
 
     bool getFont(uint16_t uni,uint8_t *buf);
 	
-	uint8_t getInfo(uint16_t uni);
+    uint8_t getInfo(uint16_t uni);
 	
     void drawStringMap(uint8_t *charBuf,uint8_t charBufLen);
 
@@ -79,5 +79,5 @@ public:
 private:
     uint16_t utf8State = 0;
     uint16_t encoding = 0 ;
-	uint32_t address = HEAD_ADDRESS; 
+    uint32_t address = HEAD_ADDRESS; 
 };
