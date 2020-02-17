@@ -1,11 +1,17 @@
 #ifndef __Flash_Font_H
 #define __Flash_Font_H
 
-
 #include "Arduino.h"
 #include <SPI.h>
 #include <UD.h>
 #include <W25QSPIFlash.h>
+
+#define ENABLE_DBG
+#ifdef ENABLE_DBG
+#define DBG(...) {Serial.print("[");Serial.print(__FUNCTION__); Serial.print("(): "); Serial.print(__LINE__); Serial.print(" ] "); Serial.println(__VA_ARGS__);}
+#else
+#define DBG(...)
+#endif
 
 #define HEAD_ADDRESS 0xc00000//SPIflash首地址
 // #define MAXBUFSIZE 1024//开在ino里
@@ -51,15 +57,17 @@ public:
 public:
     Flash_Font();
 
-	void begin(void);
+    void begin(void);
 
     uint16_t utf8 (uint8_t b);
 
     void printString(const String &string) ;
 
-    uint8_t getFont(uint16_t uni);
-
-	void drawStringMap(uint8_t *charBuf);
+    bool getFont(uint16_t uni,uint8_t *buf);
+	
+	uint8_t getInfo(uint16_t uni);
+	
+    void drawStringMap(uint8_t *charBuf,uint8_t charBufLen);
 
     void eraseSpace (void);
 
