@@ -11,8 +11,17 @@ void setup() {
 }
 
 void loop() {
-  uint8_t buf;
   String string1 = "abc"; 
+  uint8_t len = string1.length();
+  const uint8_t *fontstr = (const uint8_t *)string1.c_str();
+  uint8_t *buf[len];
+  uint16_t ucode;
+  for(int i=0;i<len;i++)
+  {
+    ucode = Flash_font.u8x8_utf8_next(fontstr[i]);
+    buf[i] = Flash_font.getFont(ucode);
+    }
+  
   Flash_font.printString(string1);
   delay(1000);
   while(1);
