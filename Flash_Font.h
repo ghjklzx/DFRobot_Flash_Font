@@ -69,7 +69,7 @@ public:
 	
     void drawStringMap(uint8_t *charBuf,uint8_t charBufLen);
 
-    void eraseSpace (void);
+    void eraseSpace(void);
 
     void burnFontLib(uint32_t fontAddress,uint32_t MAXBUFSIZE);
     
