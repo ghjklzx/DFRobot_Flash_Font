@@ -53,20 +53,20 @@ public:
 
 	void begin(void);
 
-    uint16_t u8x8_utf8_next (uint8_t b);
+    uint16_t utf8 (uint8_t b);
 
     void printString(const String &string) ;
 
-    uint8_t getBuf(uint16_t uni);
-    
-	void drawStringMap(uint8_t charBuf);
+    uint8_t getFont(uint16_t uni);
+
+	void drawStringMap(uint8_t *charBuf);
 
     void eraseSpace (void);
 
     void burnFontLib(uint32_t fontAddress,uint32_t MAXBUFSIZE);
     
     void SDInit(void);
-    
+
 
 private:
     uint16_t utf8State = 0;

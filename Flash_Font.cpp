@@ -8,7 +8,7 @@ void Flash_Font::begin(void)
 	W25Q.read( HEAD_ADDRESS, &uniInfo , FONT_INFO_BYTES );//读取字模文件头部信息
 }
 
-uint16_t Flash_Font::u8x8_utf8_next(uint8_t b) 
+uint16_t Flash_Font::utf8(uint8_t b) 
 {
 	if ( b == 0 || b == '\n' )  /* '\n' terminates the string to support the string list procedures */
 	return 0x0ffff; /* end of string detected, pending UTF8 is discarded */
@@ -45,56 +45,72 @@ uint16_t Flash_Font::u8x8_utf8_next(uint8_t b)
 	return encoding;
 }
 
-void Flash_Font::printString(const String &string) 
+// void Flash_Font::printString(const String &string) 
+// {
+// 	uint16_t buf;
+// 	int len = string.length();
+// 	SerialUSB.print("length=");SerialUSB.println(len);
+// 	const uint8_t *buffer2 = (const uint8_t *)string.c_str();
+// 	uint16_t ucode;
+// 	for (int i = 0; i < len; i++) 
+// 	{
+// 		ucode = utf8(buffer2[i]);
+// 		if(ucode <0x0fffe) 
+// 		{
+// 			SerialUSB.print("unicode=");SerialUSB.println(ucode);
+// 			drawStringMap(ucode);
+// 		}
+// 	}
+// }
+void Flash_Font::printString(const String &string)
 {
-	uint16_t buf;
+
 	int len = string.length();
-	SerialUSB.print("length=");SerialUSB.println(len);
 	const uint8_t *buffer2 = (const uint8_t *)string.c_str();
 	uint16_t ucode;
+	uint8_t *charBuf;
 	for (int i = 0; i < len; i++) 
 	{
-		ucode = u8x8_utf8_next(buffer2[i]);
+		ucode = utf8(buffer2[i]);
 		if(ucode <0x0fffe) 
 		{
-			SerialUSB.print("unicode=");SerialUSB.println(ucode);
-			buf=getBuf(ucode);
-			drawStringMap(buf);
+			uint8_t *charBuf = getFont(ucode);
+			drawStringMap(charBuf);
 		}
 	}
 }
-uint8_t Flash_Font::getBuf(uint16_t uni)
-{
-	if (uni > (uniInfo.lastChar) || uni < (uniInfo.firstChar))
-		return;
+
+uint8_t Flash_Font::getFont(uint16_t uni)
+{	uint8_t buf;
+    if (uni > (uniInfo.lastChar) || uni < (uniInfo.firstChar))
+		return &buf;
 
 	address = HEAD_ADDRESS + FONT_INFO_BYTES + uni * 6;
-	SerialUSB.print("address=");SerialUSB.println(address);
+	// SerialUSB.print("address=");SerialUSB.println(address);
 	
 	charInfo_t charInfo;
 	W25Q.read(address, &charInfo, CHAR_ADDRESS_AND_BYTES_LEN);
 	delay(10);
-	SerialUSB.print("len");SerialUSB.print(" ");SerialUSB.print(charInfo.len);SerialUSB.print(" ");SerialUSB.print(" ");
-	SerialUSB.print("ptrCharData");SerialUSB.print(" ");SerialUSB.println(charInfo.ptrCharData);
+	// SerialUSB.print("len");SerialUSB.print(" ");SerialUSB.print(charInfo.len);SerialUSB.print(" ");SerialUSB.print(" ");
+	// SerialUSB.print("ptrCharData");SerialUSB.print(" ");SerialUSB.println(charInfo.ptrCharData);
 	if (charInfo.ptrCharData == 0 || charInfo.len == 0)
-		return;
+		return &buf;
 
 	charSpec_t charSpec;
 	address = (charInfo.ptrCharData) + HEAD_ADDRESS;
 	W25Q.read(address, &charSpec, CHAR_WIGTH_AND_BYTE_PER_LINE);
 	delay(10);
-	SerialUSB.print("width");SerialUSB.print(" ");SerialUSB.print(charSpec.width);SerialUSB.print(" ");SerialUSB.print(" ");
-	SerialUSB.print("bytePerLine");SerialUSB.print(" ");SerialUSB.println(charSpec.bytePerLine);
+	// SerialUSB.print("width");SerialUSB.print(" ");SerialUSB.print(charSpec.width);SerialUSB.print(" ");SerialUSB.print(" ");
+	// SerialUSB.print("bytePerLine");SerialUSB.print(" ");SerialUSB.println(charSpec.bytePerLine);
 
 	uint8_t charBufLen = (charInfo.len) - CHAR_WIGTH_AND_BYTE_PER_LINE;
 	uint8_t charBuf[charBufLen];
 	address = address + CHAR_WIGTH_AND_BYTE_PER_LINE;
 	W25Q.read(address, charBuf, charBufLen);
-	delay(10);
 	return charBuf;
 }
 
-void Flash_Font::drawStringMap(uint8_t charBuf) 
+void Flash_Font::drawStringMap(uint8_t &charBuf) 
 {
 	int count = 0;
 	int w = 0;
