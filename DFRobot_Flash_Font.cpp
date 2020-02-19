@@ -68,28 +68,30 @@ void DFRobot_Flash_Font::printString(const String &string)
 }
 
 bool DFRobot_Flash_Font::getFont(uint16_t uni,uint8_t *buf, uint8_t& width, uint8_t& len,uint8_t& bytePerLine)
-{	
+{
 	DBG(uni);
 	uint32_t address;
     if (uni > (uniInfo.lastChar) || uni < (uniInfo.firstChar))
 		return false;
+
 	address = HEAD_ADDRESS + FONT_INFO_BYTES + uni * 6;
 	DBG(address);
+	
 	charInfo_t charInfo;
 	W25Q.read(address, &charInfo, CHAR_ADDRESS_AND_BYTES_LEN);
 	DBG(charInfo.ptrCharData);
 	delay(10);
 	if (charInfo.ptrCharData == 0 || charInfo.len == 0)
 		return false;
+
 	charSpec_t charSpec;
 	address = (charInfo.ptrCharData) + HEAD_ADDRESS;
 	W25Q.read(address, &charSpec, CHAR_WIGTH_AND_BYTE_PER_LINE);
 	DBG(charSpec.width);
 	delay(10);
+
 	uint8_t charBufLen = (charInfo.len) - CHAR_WIGTH_AND_BYTE_PER_LINE;
-	DBG(charSpec.width);
 	address = address + CHAR_WIGTH_AND_BYTE_PER_LINE;
-	DBG(charSpec.width);
 	W25Q.read(address, buf, charBufLen);
 	
 	//判断是否成功赋值
