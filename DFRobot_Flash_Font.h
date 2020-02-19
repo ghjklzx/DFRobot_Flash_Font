@@ -1,5 +1,5 @@
-#ifndef __Flash_Font_H
-#define __Flash_Font_H
+#ifndef __DFRobot_Flash_Font_H
+#define __DFRobot_Flash_Font_H
 
 #include "Arduino.h"
 #include <SPI.h>
@@ -8,13 +8,12 @@
 
 #define ENABLE_DBG
 #ifdef ENABLE_DBG
-#define DBG(...) {Serial.print("[");Serial.print(__FUNCTION__); Serial.print("(): "); Serial.print(__LINE__); Serial.print(" ] "); Serial.println(__VA_ARGS__);}
+#define DBG(...) {SerialUSB.print("[");SerialUSB.print(__FUNCTION__); SerialUSB.print("(): "); SerialUSB.print(__LINE__); SerialUSB.print(" ] "); SerialUSB.println(__VA_ARGS__);}
 #else
 #define DBG(...)
 #endif
 
 #define HEAD_ADDRESS 0xc00000//SPIflash首地址
-// #define MAXBUFSIZE 1024//开在ino里
 
 #define CS 32//SPIflash片选引脚
 #define CS_H  digitalWrite(CS, HIGH)
@@ -25,7 +24,7 @@
 #define CHAR_WIGTH_AND_BYTE_PER_LINE   4//
 #endif
 
-class Flash_Font
+class DFRobot_Flash_Font
 {
 public:
     typedef struct 
@@ -52,22 +51,20 @@ public:
     uniInfo_t uniInfo;
     uint32_t transSize = 0;
     uint32_t fileSize;
-    File File_f;
+    File fileData;
 
 public:
-    Flash_Font();
+    DFRobot_Flash_Font();
 
     void begin(void);
 
-    uint16_t utf8 (uint8_t b);
+    uint16_t utf8Trans (uint8_t utf8);
 
     void printString(const String &string) ;
 
-    bool getFont(uint16_t uni,uint8_t *buf);
-	
-    uint8_t getInfo(uint16_t uni);
-	
-    void drawStringMap(uint8_t *charBuf,uint8_t charBufLen);
+    bool getFont(uint16_t uni,uint8_t *buf, uint8_t& width, uint8_t& len,uint8_t& bytePerLine);
+
+    void drawStringMap(uint8_t *charBuf,uint8_t width, uint8_t len,uint8_t bytePerLine);
 
     void eraseSpace(void);
 
@@ -79,5 +76,4 @@ public:
 private:
     uint16_t utf8State = 0;
     uint16_t encoding = 0 ;
-    uint32_t address = HEAD_ADDRESS; 
 };
