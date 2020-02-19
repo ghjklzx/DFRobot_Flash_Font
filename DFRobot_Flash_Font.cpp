@@ -45,23 +45,7 @@ uint16_t DFRobot_Flash_Font::utf8Trans(uint8_t utf8)
 	return encoding;
 }
 
-// void DFRobot_Flash_Font::printString(const String &string) 
-// {
-// 	uint16_t buf;
-// 	int len = string.length();
-// 	SerialUSB.print("length=");SerialUSB.println(len);
-// 	const uint8_t *buffer2 = (const uint8_t *)string.c_str();
-// 	uint16_t ucode;
-// 	for (int i = 0; i < len; i++) 
-// 	{
-// 		ucode = utf8(buffer2[i]);
-// 		if(ucode <0x0fffe) 
-// 		{
-// 			SerialUSB.print("unicode=");SerialUSB.println(ucode);
-// 			drawStringMap(ucode);
-// 		}
-// 	}
-// }
+
 
 void DFRobot_Flash_Font::printString(const String &string)
 {
