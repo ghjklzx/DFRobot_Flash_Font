@@ -57,18 +57,12 @@ public:
     DFRobot_Flash_Font();
 
     void begin(void);
-	
-	uint8_t* convert(String &s);
-	
-	bool avaible(void);
-	
-	uint8_t* utf8Get(uint8_t* utf8);
-	
-	uint16_t transfer(uint8_t utf8,uint16_t& index);
+
+    uint16_t utf8Trans (uint8_t utf8);
 
     void printString(const String &string) ;
 
-    bool getFont(uint8_t *uni,uint8_t *buf, uint8_t& width, uint8_t& len,uint8_t& bytePerLine);
+    bool getFont(uint16_t uni,uint8_t *buf, uint8_t& width, uint8_t& len,uint8_t& bytePerLine);
 
     void drawStringMap(uint8_t *charBuf,uint8_t width, uint8_t len,uint8_t bytePerLine);
 
@@ -80,6 +74,6 @@ public:
 
 
 private:
-	uint16_t _index=0;
-	uint8_t _len=0;
+    uint16_t utf8State = 0;
+    uint16_t encoding = 0 ;
 };

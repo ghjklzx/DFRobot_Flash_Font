@@ -8,102 +8,48 @@ void DFRobot_Flash_Font::begin(void)
 	W25Q.read( HEAD_ADDRESS, &uniInfo , FONT_INFO_BYTES );//读取字模文件头部信息
 }
 
-uint8_t* DFRobot_Flash_Font::utf8Get(uint8_t* utf8)
+void DFRobot_Flash_Font::transfer()
 {
 	
-	if ( utf8[_index] == 0 || utf8[_index] == '\n' )  /* '\n' terminates the string to support the string list procedures */
-	{
-		uint8_t uni[1]={0xff};
-		return uni;
-	} 
-	uint8_t utf8State = 0;
-	if(utf8[_index] >= 0xfc)
-		{
-			utf8State = 5;
-			_index++;
-			uint8_t uni[utf8State];
-			uni[0] = utf8[_index]&1;
-			for(uint8_t i=1;i<=5;i++)
-			{
-				uni[i]= (utf8[_index]&= 0x03f);
-				utf8State--;
-				_index++;
-			}
-			return uni;
-		}else if(utf8[_index] >= 0xf8)
-		{
+}
+
+uint16_t DFRobot_Flash_Font::utf8Trans(uint8_t utf8) 
+{
+	if ( utf8 == 0 || utf8 == '\n' )  /* '\n' terminates the string to support the string list procedures */
+	return 0x0ffff; /* end of string detected, pending UTF8 is discarded */
+	if ( utf8State == 0 ) {
+		if ( utf8 >= 0xfc ) {/* 6 byte sequence */
+		    utf8State = 5;
+			utf8 &= 1;
+		} else if ( utf8 >= 0xf8 ) {
 			utf8State = 4;
-			_index++;
-			uint8_t uni[utf8State];
-			uni[0] = utf8[_index]&3;
-			for(uint8_t i=1;i<=4;i++)
-			{
-				uni[i]= (utf8[_index]&= 0x03f);
-				utf8State--;
-				_index++;
-			}
-			return uni;
-			
-		}else if(utf8[_index] >= 0xf0)
-		{
+			utf8 &= 3;
+		} else if ( utf8 >= 0xf0 ) {
 			utf8State = 3;
-			_index++;
-			uint8_t uni[utf8State];
-			uni[0] = utf8[_index]&7;
-			for(uint8_t i=1;i<=3;i++)
-			{
-				uni[i]= (utf8[_index]&= 0x03f);
-				utf8State--;
-				_index++;
-			}
-			return uni;
-			
-		}else if(utf8[_index] >= 0xe0)
-		{
+			utf8 &= 7;      
+		} else if ( utf8 >= 0xe0 ) {
 			utf8State = 2;
-			_index++;
-			uint8_t uni[utf8State];
-			uni[0] = utf8[_index]&15;
-			for(uint8_t i=1;i<=2;i++)
-			{
-				uni[i]= (utf8[_index]&= 0x03f);
-				utf8State--;
-				_index++;
-			}
-			return uni;
-			
-		}else if(utf8[_index] >= 0xc0)
-		{
+			utf8 &= 15;
+		} else if ( utf8 >= 0xc0 ) {
 			utf8State = 1;
-			_index++;
-			uint8_t uni[utf8State];
-			uni[0] = utf8[_index]&0x01f;
-			for(uint8_t i=1;i<=1;i++)
-			{
-				uni[i]= (utf8[_index]&= 0x03f);
-				utf8State--;
-				_index++;
-			}
-			return uni;
-		}else if(utf8[_index] <=0x7f)
-		{
-			_index++;
-			uint8_t uni[1] = {utf8[_index]&=0x7f};
-			return uni;
+			utf8 &= 0x01f;
+		} else {/* do nothing, just use the value as encoding */
+			return utf8;
 		}
+		encoding = utf8;
+		return 0x0fffe;
+	} else {
+		utf8State--;
+		/* The case b < 0x080 (an illegal UTF8 encoding) is not checked here. */
+		encoding <<= 6;
+		utf8 &= 0x03f;
+		encoding |= utf8; 
+		if ( utf8State != 0 )
+			return 0x0fffe; /* nothing to do yet */
+	}
+	return encoding;
 }
 
-bool DFRobot_Flash_Font::avaible()
-{
-	return _len==_index;
-}
-
-uint8_t* DFRobot_Flash_Font::convert(String &s)
-{
-	const uint8_t *utf8 = (const uint8_t *)s.c_str();
-	_len = s.length();
-	return utf8;
-}
 
 
 void DFRobot_Flash_Font::printString(const String &string)
@@ -126,46 +72,42 @@ void DFRobot_Flash_Font::printString(const String &string)
 	}
 }
 
-bool DFRobot_Flash_Font::getFont(uint8_t *uni,uint8_t *buf, uint8_t& width, uint8_t& len,uint8_t& bytePerLine)
+bool DFRobot_Flash_Font::getFont(uint16_t uni,uint8_t *buf, uint8_t& width, uint8_t& len,uint8_t& bytePerLine)
 {
-	int i=0
-	while(uni[i])
-	{
-		uint32_t address;
-		if (uni[i] > (uniInfo.lastChar) || uni[i] < (uniInfo.firstChar))
-			return false;
+	DBG(uni);
+	uint32_t address;
+    if (uni > (uniInfo.lastChar) || uni < (uniInfo.firstChar))
+		return false;
 
-		address = HEAD_ADDRESS + FONT_INFO_BYTES + uni[i] * 6;
-		DBG(address);
+	address = HEAD_ADDRESS + FONT_INFO_BYTES + uni * 6;
+	DBG(address);
 	
-		charInfo_t charInfo;
-		W25Q.read(address, &charInfo, CHAR_ADDRESS_AND_BYTES_LEN);
-		DBG(charInfo.ptrCharData);
-		delay(10);
-		if (charInfo.ptrCharData == 0 || charInfo.len == 0)
-			return false;
+	charInfo_t charInfo;
+	W25Q.read(address, &charInfo, CHAR_ADDRESS_AND_BYTES_LEN);
+	DBG(charInfo.ptrCharData);
+	delay(10);
+	if (charInfo.ptrCharData == 0 || charInfo.len == 0)
+		return false;
 
-		charSpec_t charSpec;
-		address = (charInfo.ptrCharData) + HEAD_ADDRESS;
-		W25Q.read(address, &charSpec, CHAR_WIGTH_AND_BYTE_PER_LINE);
-		DBG(charSpec.width);
-		delay(10);
+	charSpec_t charSpec;
+	address = (charInfo.ptrCharData) + HEAD_ADDRESS;
+	W25Q.read(address, &charSpec, CHAR_WIGTH_AND_BYTE_PER_LINE);
+	DBG(charSpec.width);
+	delay(10);
 
-		uint8_t charBufLen = (charInfo.len) - CHAR_WIGTH_AND_BYTE_PER_LINE;
-		address = address + CHAR_WIGTH_AND_BYTE_PER_LINE;
-		W25Q.read(address, buf, charBufLen);
+	uint8_t charBufLen = (charInfo.len) - CHAR_WIGTH_AND_BYTE_PER_LINE;
+	address = address + CHAR_WIGTH_AND_BYTE_PER_LINE;
+	W25Q.read(address, buf, charBufLen);
 	
-		//判断是否成功赋值
-		DBG(charSpec.width);
-		width = charSpec.width;
-		len = charBufLen;
-		bytePerLine = charSpec.bytePerLine;
-		DBG("width=");DBG(width);
-		DBG("len=");DBG(len);
-		DBG("bytePerLine");DBG(bytePerLine);
-		return true;
-		i++;
-	}
+	//判断是否成功赋值
+	DBG(charSpec.width);
+	width = charSpec.width;
+	len = charBufLen;
+	bytePerLine = charSpec.bytePerLine;
+	DBG("width=");DBG(width);
+	DBG("len=");DBG(len);
+	DBG("bytePerLine");DBG(bytePerLine);
+	return true;
 }
 
 void DFRobot_Flash_Font::drawStringMap(uint8_t *charBuf,uint8_t width, uint8_t len,uint8_t bytePerLine ) 
