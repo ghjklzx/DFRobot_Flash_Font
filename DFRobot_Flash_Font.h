@@ -29,24 +29,24 @@ class DFRobot_Flash_Font
 public:
     typedef struct 
     {
-		char title[4];//juix
-		uint16_t height;//16
-		uint16_t width;//16
-		uint16_t baseline;//12
-		uint16_t xHeight;
-		uint16_t yHeight;
-		uint16_t firstChar;//0
-		uint16_t lastChar; //65535
+	    char title[4];//juix
+	    uint16_t height;//16
+	    uint16_t width;//16
+	    uint16_t baseline;//12
+	    uint16_t xHeight;
+	    uint16_t yHeight;
+	    uint16_t firstChar;//0
+	    uint16_t lastChar; //65535
     } __attribute__ ((packed)) uniInfo_t;//所有字符的信息
 
     typedef struct {
-		uint32_t ptrCharData;
-		uint16_t len;
+	    uint32_t ptrCharData;
+	    uint16_t len;
     } __attribute__ ((packed)) charInfo_t;//字符信息
 
     typedef struct {
-		uint16_t width;
-		uint16_t bytePerLine;
+	    uint16_t width;
+	    uint16_t bytePerLine;
     } __attribute__ ((packed)) charSpec_t;//字符信息
     uniInfo_t uniInfo;
     uint32_t transSize = 0;
