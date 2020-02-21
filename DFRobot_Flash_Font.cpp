@@ -4,7 +4,7 @@ DFRobot_Flash_Font::DFRobot_Flash_Font() {}
 
 void DFRobot_Flash_Font::begin(void)
 {
-    pinMode(CS, OUTPUT); //设置SPI FLASH的片选引脚为输出模式
+	pinMode(CS, OUTPUT); //设置SPI FLASH的片选引脚为输出模式
 	W25Q.read( HEAD_ADDRESS, &uniInfo , FONT_INFO_BYTES );//读取字模文件头部信息
 }
 
