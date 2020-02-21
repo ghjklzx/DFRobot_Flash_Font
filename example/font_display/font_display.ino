@@ -39,15 +39,18 @@ void setup() {
 }
 
 void loop() {
-    String string1 = "你";
+    String string1 = "你好";
+    String string2 = "成都";
     uint8_t charBuf[32];
     uint8_t width,lenth,bytePerLine;
+    font.cache(string2);
+    ucode = font.utf8Get();
     font.cache(string1);
     while(font.avaible())
     {
       uint32_t ucode;
-      ucode = font.utf8Get();
-      font.getFont(ucode,charBuf,width,lenth,bytePerLine);
+      ucode = font.readUni();
+      font.getFont(ucode,charBuf,width,lenth,bytePerLine);//结构体
       drawStringMap(charBuf,width,lenth,bytePerLine);
      };
      SerialUSB.print("loop");
