@@ -54,7 +54,7 @@ public:
 	File fileData;
 
 public:
-    DFRobot_Flash_Font();
+	DFRobot_Flash_Font();
 	void begin(void);
 	void cache(String &s);
 	bool avaible(void);
@@ -66,8 +66,8 @@ public:
 	void burnFontLib(uint32_t fontAddress,uint32_t MAXBUFSIZE);
 	void SDInit(void);
 private:
-    String _s;
-    const uint8_t *_utf8;
-    uint16_t _index=0;
-    uint8_t _len=0;
+	String _s;
+	const uint8_t *_utf8;
+	uint16_t _index=0;
+	uint8_t _len=0;
 };
