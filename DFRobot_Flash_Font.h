@@ -40,23 +40,23 @@ public:
     } __attribute__ ((packed)) uniInfo_t;//所有字符的信息
 
     typedef struct {
-    uint32_t ptrCharData;
-    uint16_t len;
+		uint32_t ptrCharData;
+		uint16_t len;
     } __attribute__ ((packed)) charInfo_t;//字符信息
 
     typedef struct {
-    uint16_t width;
-    uint16_t bytePerLine;
+		uint16_t width;
+		uint16_t bytePerLine;
     } __attribute__ ((packed)) charSpec_t;//字符信息
-    uniInfo_t uniInfo;
-    uint32_t transSize = 0;
-    uint32_t fileSize;
-    File fileData;
+	uniInfo_t uniInfo;
+	uint32_t transSize = 0;
+	uint32_t fileSize;
+	File fileData;
 
 public:
     DFRobot_Flash_Font();
-
-    void begin(void);
+	
+	void begin(void);
 	
 	void cache(String &s);
 	
@@ -65,8 +65,6 @@ public:
 	uint32_t utf8Get();
 	
 	uint16_t transfer(uint8_t utf8,uint16_t& index);
-
-  //  void printString(const String &string) ;
 
     bool getFont(uint32_t uni,uint8_t *buf, uint8_t& width, uint8_t& len,uint8_t& bytePerLine);
 
