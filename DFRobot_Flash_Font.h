@@ -29,14 +29,14 @@ class DFRobot_Flash_Font
 public:
     typedef struct 
     {
-        char title[4];//juix
-        uint16_t height;//16
-        uint16_t width;//16
-        uint16_t baseline;//12
-        uint16_t xHeight;
-        uint16_t yHeight;
-        uint16_t firstChar;//0
-        uint16_t lastChar; //65535
+		char title[4];//juix
+		uint16_t height;//16
+		uint16_t width;//16
+		uint16_t baseline;//12
+		uint16_t xHeight;
+		uint16_t yHeight;
+		uint16_t firstChar;//0
+		uint16_t lastChar; //65535
     } __attribute__ ((packed)) uniInfo_t;//所有字符的信息
 
     typedef struct {
@@ -55,30 +55,19 @@ public:
 
 public:
     DFRobot_Flash_Font();
-	
 	void begin(void);
-	
 	void cache(String &s);
-	
 	bool avaible(void);
-	
 	uint32_t utf8Get();
-	
 	uint16_t transfer(uint8_t utf8,uint16_t& index);
-
-    bool getFont(uint32_t uni,uint8_t *buf, uint8_t& width, uint8_t& len,uint8_t& bytePerLine);
-
-    void drawStringMap(uint8_t *charBuf,uint8_t width, uint8_t len,uint8_t bytePerLine);
-
-    void eraseSpace(void);
-
-    void burnFontLib(uint32_t fontAddress,uint32_t MAXBUFSIZE);
-    
-    void SDInit(void);
-
+	bool getFont(uint32_t uni,uint8_t *buf, uint8_t& width, uint8_t& len,uint8_t& bytePerLine);
+	void drawStringMap(uint8_t *charBuf,uint8_t width, uint8_t len,uint8_t bytePerLine);
+	void eraseSpace(void);
+	void burnFontLib(uint32_t fontAddress,uint32_t MAXBUFSIZE);
+	void SDInit(void);
 private:
-	String _s;
-	const uint8_t *_utf8;
-	uint16_t _index=0;
-	uint8_t _len=0;
+    String _s;
+    const uint8_t *_utf8;
+    uint16_t _index=0;
+    uint8_t _len=0;
 };
