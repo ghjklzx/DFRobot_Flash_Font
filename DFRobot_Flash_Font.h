@@ -58,17 +58,17 @@ public:
 
     void begin(void);
 	
-	uint8_t* convert(String &s);
+	void cache(String &s);
 	
 	bool avaible(void);
 	
-	uint8_t* utf8Get(uint8_t* utf8);
+	uint32_t utf8Get();
 	
 	uint16_t transfer(uint8_t utf8,uint16_t& index);
 
-    void printString(const String &string) ;
+  //  void printString(const String &string) ;
 
-    bool getFont(uint8_t *uni,uint8_t *buf, uint8_t& width, uint8_t& len,uint8_t& bytePerLine);
+    bool getFont(uint32_t uni,uint8_t *buf, uint8_t& width, uint8_t& len,uint8_t& bytePerLine);
 
     void drawStringMap(uint8_t *charBuf,uint8_t width, uint8_t len,uint8_t bytePerLine);
 
@@ -78,8 +78,9 @@ public:
     
     void SDInit(void);
 
-
 private:
+	String _s;
+	const uint8_t *_utf8;
 	uint16_t _index=0;
 	uint8_t _len=0;
 };

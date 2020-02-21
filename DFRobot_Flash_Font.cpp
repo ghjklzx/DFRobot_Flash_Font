@@ -8,164 +8,158 @@ void DFRobot_Flash_Font::begin(void)
 	W25Q.read( HEAD_ADDRESS, &uniInfo , FONT_INFO_BYTES );//读取字模文件头部信息
 }
 
-uint8_t* DFRobot_Flash_Font::utf8Get(uint8_t* utf8)
+void DFRobot_Flash_Font::cache(String &s)
 {
-	
-	if ( utf8[_index] == 0 || utf8[_index] == '\n' )  /* '\n' terminates the string to support the string list procedures */
+	_s = s;
+	_utf8 = (const uint8_t *)_s.c_str();
+	DBG(*_utf8);
+	DBG("_utf8[_index]=");DBG(_utf8[_index]);
+	_len = _s.length();
+}
+
+uint32_t DFRobot_Flash_Font::utf8Get()
+{
+	DBG(_index);
+	DBG("_utf8[_index]=");DBG(_utf8[_index]);
+	uint32_t uni=0;
+	if ( _utf8[_index] == 0 || _utf8[_index] == '\n' )  /* '\n' terminates the string to support the string list procedures */
 	{
-		uint8_t uni[1]={0xff};
+		uni=0xff;
+		_index++;
+		DBG(_index);
+		DBG(uni);
 		return uni;
+		
 	} 
 	uint8_t utf8State = 0;
-	if(utf8[_index] >= 0xfc)
+	if(_utf8[_index] >= 0xfc)
 		{
 			utf8State = 5;
+			uni = _utf8[_index]&1;
 			_index++;
-			uint8_t uni[utf8State];
-			uni[0] = utf8[_index]&1;
 			for(uint8_t i=1;i<=5;i++)
 			{
-				uni[i]= (utf8[_index]&= 0x03f);
+				uni <<= 6;
+				uni |= (_utf8[_index]&0x3f);
 				utf8State--;
 				_index++;
 			}
+			DBG(_index);DBG(uni);
 			return uni;
-		}else if(utf8[_index] >= 0xf8)
+		}else if(_utf8[_index] >= 0xf8)
 		{
 			utf8State = 4;
+			uni = _utf8[_index]&3;
 			_index++;
-			uint8_t uni[utf8State];
-			uni[0] = utf8[_index]&3;
 			for(uint8_t i=1;i<=4;i++)
 			{
-				uni[i]= (utf8[_index]&= 0x03f);
+				uni <<= 6;
+				uni |= (_utf8[_index]& 0x03f);
 				utf8State--;
 				_index++;
 			}
+			DBG(_index);DBG(uni);
 			return uni;
 			
-		}else if(utf8[_index] >= 0xf0)
+		}else if(_utf8[_index] >= 0xf0)
 		{
 			utf8State = 3;
+			uni = _utf8[_index]&7;
 			_index++;
-			uint8_t uni[utf8State];
-			uni[0] = utf8[_index]&7;
 			for(uint8_t i=1;i<=3;i++)
 			{
-				uni[i]= (utf8[_index]&= 0x03f);
+				uni <<= 6;
+				uni |= (_utf8[_index]& 0x03f);
 				utf8State--;
 				_index++;
+				DBG(_index);
 			}
+			DBG(_index);DBG(uni);
 			return uni;
 			
-		}else if(utf8[_index] >= 0xe0)
+		}else if(_utf8[_index] >= 0xe0)
 		{
 			utf8State = 2;
+			DBG("index=");DBG(_index);
+			uni = _utf8[_index]&15;
 			_index++;
-			uint8_t uni[utf8State];
-			uni[0] = utf8[_index]&15;
+			DBG("uni=");DBG(uni);
 			for(uint8_t i=1;i<=2;i++)
 			{
-				uni[i]= (utf8[_index]&= 0x03f);
+				uni <<= 6;
+				uni |= (_utf8[_index]&0x03f);
 				utf8State--;
 				_index++;
+				DBG("uni=");DBG(uni);
+				DBG("index=");DBG(_index);
 			}
-			return uni;
-			
-		}else if(utf8[_index] >= 0xc0)
+			DBG(_index);DBG(uni);
+			return uni;	
+		}else if(_utf8[_index] >= 0xc0)
 		{
 			utf8State = 1;
+			uni = _utf8[_index]&0x1f;
 			_index++;
-			uint8_t uni[utf8State];
-			uni[0] = utf8[_index]&0x01f;
 			for(uint8_t i=1;i<=1;i++)
 			{
-				uni[i]= (utf8[_index]&= 0x03f);
+				uni <<= 6;
+				uni |= (_utf8[_index]& 0x03f);
 				utf8State--;
 				_index++;
+				DBG(_index);
 			}
+			DBG(_index);DBG(uni);
 			return uni;
-		}else if(utf8[_index] <=0x7f)
+		}else if(_utf8[_index] <=0x80)
 		{
+			uni |= (_utf8[_index]&0x7f);
 			_index++;
-			uint8_t uni[1] = {utf8[_index]&=0x7f};
+			DBG("index")DBG(_index);
+			DBG("uni");DBG(uni);
 			return uni;
 		}
 }
 
 bool DFRobot_Flash_Font::avaible()
 {
-	return _len==_index;
+	DBG(_len);
+	DBG(_index);
+	DBG("_utf8[_index]=");DBG(_utf8[_index]);
+	return !(_len ==_index);
 }
 
-uint8_t* DFRobot_Flash_Font::convert(String &s)
+bool DFRobot_Flash_Font::getFont(uint32_t uni,uint8_t *buf, uint8_t& width, uint8_t& len,uint8_t& bytePerLine)
 {
-	const uint8_t *utf8 = (const uint8_t *)s.c_str();
-	_len = s.length();
-	return utf8;
-}
-
-
-void DFRobot_Flash_Font::printString(const String &string)
-{
-	int len = string.length();
-	const uint8_t *buffer2 = (const uint8_t *)string.c_str();
-	uint16_t ucode;
-	uint8_t charBuf[32];
-	uint8_t width,lenth,bytePerLine;
-	for (int i = 0; i < len; i++) 
-	{
-		DBG("len");DBG(len);
-		ucode = utf8Trans(buffer2[i]);
-		if(ucode <0x0fffe) 
-		{
-			getFont(ucode,charBuf,width,lenth,bytePerLine);
-			DBG("charBuf=");DBG(charBuf[0]);
-			drawStringMap(charBuf,width,lenth,bytePerLine);
-		}
-	}
-}
-
-bool DFRobot_Flash_Font::getFont(uint8_t *uni,uint8_t *buf, uint8_t& width, uint8_t& len,uint8_t& bytePerLine)
-{
-	int i=0
-	while(uni[i])
-	{
-		uint32_t address;
-		if (uni[i] > (uniInfo.lastChar) || uni[i] < (uniInfo.firstChar))
-			return false;
-
-		address = HEAD_ADDRESS + FONT_INFO_BYTES + uni[i] * 6;
-		DBG(address);
+	uint32_t address;
+	if (uni > (uniInfo.lastChar) || uni < (uniInfo.firstChar))
+	return false;
+	address = HEAD_ADDRESS + FONT_INFO_BYTES + uni * 6;
+	DBG();DBG(address);
+	charInfo_t charInfo;
+	W25Q.read(address, &charInfo, CHAR_ADDRESS_AND_BYTES_LEN);
+	DBG(charInfo.ptrCharData);
+	delay(10);
+	if (charInfo.ptrCharData == 0 || charInfo.len == 0)
+	return false;
+	charSpec_t charSpec;
+	address = (charInfo.ptrCharData) + HEAD_ADDRESS;
+	W25Q.read(address, &charSpec, CHAR_WIGTH_AND_BYTE_PER_LINE);
+	delay(10);
+	uint8_t charBufLen = (charInfo.len) - CHAR_WIGTH_AND_BYTE_PER_LINE;
+	address = address + CHAR_WIGTH_AND_BYTE_PER_LINE;
+	W25Q.read(address, buf, charBufLen);
 	
-		charInfo_t charInfo;
-		W25Q.read(address, &charInfo, CHAR_ADDRESS_AND_BYTES_LEN);
-		DBG(charInfo.ptrCharData);
-		delay(10);
-		if (charInfo.ptrCharData == 0 || charInfo.len == 0)
-			return false;
-
-		charSpec_t charSpec;
-		address = (charInfo.ptrCharData) + HEAD_ADDRESS;
-		W25Q.read(address, &charSpec, CHAR_WIGTH_AND_BYTE_PER_LINE);
-		DBG(charSpec.width);
-		delay(10);
-
-		uint8_t charBufLen = (charInfo.len) - CHAR_WIGTH_AND_BYTE_PER_LINE;
-		address = address + CHAR_WIGTH_AND_BYTE_PER_LINE;
-		W25Q.read(address, buf, charBufLen);
+	//判断是否成功赋值
+	DBG(charSpec.width);
+	width = charSpec.width;
+	len = charBufLen;
+	bytePerLine = charSpec.bytePerLine;
+	DBG("width=");DBG(width);
+	DBG("len=");DBG(len);
+	DBG("bytePerLine");DBG(bytePerLine);
+	return true;
+		
 	
-		//判断是否成功赋值
-		DBG(charSpec.width);
-		width = charSpec.width;
-		len = charBufLen;
-		bytePerLine = charSpec.bytePerLine;
-		DBG("width=");DBG(width);
-		DBG("len=");DBG(len);
-		DBG("bytePerLine");DBG(bytePerLine);
-		return true;
-		i++;
-	}
 }
 
 void DFRobot_Flash_Font::drawStringMap(uint8_t *charBuf,uint8_t width, uint8_t len,uint8_t bytePerLine ) 

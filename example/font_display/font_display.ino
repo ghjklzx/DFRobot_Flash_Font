@@ -27,6 +27,7 @@ void drawStringMap(uint8_t *charBuf,uint8_t wid, uint8_t len,uint8_t bytePerLine
      }
   SerialUSB.println();
 }
+
 void setup() {
   // put your setup code here, to run once:
   SerialUSB.begin(115200);
@@ -38,18 +39,17 @@ void setup() {
 }
 
 void loop() {
-    String string1 = "你a好";
+    String string1 = "你";
     uint8_t charBuf[32];
     uint8_t width,lenth,bytePerLine;
-    uint8_t *fontstr = font.convert(string1);
+    font.cache(string1);
     while(font.avaible())
     {
-      uint8_t *ucode;
-      ucode = font.utf8Get(fontstr);
+      uint32_t ucode;
+      ucode = font.utf8Get();
       font.getFont(ucode,charBuf,width,lenth,bytePerLine);
       drawStringMap(charBuf,width,lenth,bytePerLine);
-      };
-    
-    font.printString(string1);
+     };
+     SerialUSB.print("loop");
     while(1);
 }
