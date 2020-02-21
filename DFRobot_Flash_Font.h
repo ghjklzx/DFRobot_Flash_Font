@@ -54,7 +54,7 @@ public:
     File fileData;
 
 public:
-    DFRobot_Flash_Font();
+	DFRobot_Flash_Font();
 	void begin(void);
 	void cache(String &s);
 	bool avaible(void);
