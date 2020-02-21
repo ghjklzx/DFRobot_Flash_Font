@@ -48,13 +48,13 @@ public:
 		uint16_t width;
 		uint16_t bytePerLine;
     } __attribute__ ((packed)) charSpec_t;//字符信息
-	uniInfo_t uniInfo;
-	uint32_t transSize = 0;
-	uint32_t fileSize;
-	File fileData;
+    uniInfo_t uniInfo;
+    uint32_t transSize = 0;
+    uint32_t fileSize;
+    File fileData;
 
 public:
-	DFRobot_Flash_Font();
+    DFRobot_Flash_Font();
 	void begin(void);
 	void cache(String &s);
 	bool avaible(void);
