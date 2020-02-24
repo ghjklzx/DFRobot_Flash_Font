@@ -9,7 +9,7 @@
  * @https:https://github.com/ghjklzx/DFRobot_Flash_Font
  */
 #include <DFRobot_Flash_Font.h>
-#include <stdlib.h>
+
 DFRobot_Flash_Font::DFRobot_Flash_Font() 
 {
 }

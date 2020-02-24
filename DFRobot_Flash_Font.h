@@ -8,7 +8,7 @@
  * @author [guo](xinyu.guo@dfrobot.com)
  * @version  V1.0
  * @date  2020-02-24
- * @https://github.com/ghjklzx/M0_Font
+ * @https://github.com/ghjklzx/DFRobot_Flash_Font
  */
 #ifndef __DFRobot_Flash_Font_H
 #define __DFRobot_Flash_Font_H
@@ -134,7 +134,7 @@ public:
    * @param 
    */
   void SDInit(void);
-  
+
 private: 
   uint8_t *_utf8;
   uint16_t _index=0;
