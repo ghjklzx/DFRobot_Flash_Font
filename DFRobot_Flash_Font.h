@@ -65,8 +65,6 @@ public:
   charData_t charData; //提供给用户字模数据
   uniInfo_t uniInfo;//字模的info信息
   uint32_t transSize = 0;
-  uint32_t fileSize;
-  File fileData;
 
 public:
   /**
@@ -91,7 +89,7 @@ public:
    * @brief 缓存字符信息
    * @param 
    */
-  void cache(char *s);
+  void cache(String &s);
 
   /**
    * @brief 判断字模是否输出完成
@@ -117,26 +115,8 @@ public:
    */
   void drawStringMap();
 
-  /**
-   * @brief 擦除字模空间
-   * @param 
-   */
-  void eraseSpace(void);
-
-  /**
-   * @brief 写入字模
-   * @param 
-   */
-  void burnFontLib(uint32_t fontAddress,uint32_t MAXBUFSIZE);
-
-  /**
-   * @brief 初始化U盘
-   * @param 
-   */
-  void SDInit(void);
-
 private: 
-  uint8_t *_utf8;
+  uint8_t *_utf8 =NULL;
   uint16_t _index=0;
   uint8_t _len=0;
 };
