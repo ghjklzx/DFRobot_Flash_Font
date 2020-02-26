@@ -14,8 +14,9 @@
 #include <UD.h>
 #include <DFRobot_Flash_Font.h>
 #define MAXBUFSIZE 1024
+#define HEAD_ADDRESS 0xc00000 
 
-DFRobot_Flash_Font Flash_font;
+DFRobot_Flash_Font font;
 File resourceFile;
 uint32_t fileSize; // font library file total size
 
