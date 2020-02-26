@@ -100,10 +100,9 @@ void setup() {
   SerialUSB.begin(115200);
   while (!SerialUSB); // wait for SerialUSB port to connect. Needed for native USB port only
   SPI.begin();
-  
-  eraseSpace(HEAD_ADDRESS);
-  SDInit();
-  burnFontLib(HEAD_ADDRESS);
+  eraseSpace(HEAD_ADDRESS);                         //擦除SPIFlash字模地址的空间
+  SDInit();                                         //U盘初始化，读取Noto.xbf字模文件
+  burnFontLib(HEAD_ADDRESS);                        //烧录Noto.xbf字模文件，在串口中显示进度条
   pinMode(13, OUTPUT);
 }
 
